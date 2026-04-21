@@ -8,8 +8,13 @@ CREATE TABLE IF NOT EXISTS "mirror_users" (
   "name" text NOT NULL UNIQUE,
   "password_hash" text NOT NULL,
   "gbrain_context" boolean DEFAULT true NOT NULL,
+  "voice_enabled" boolean DEFAULT false NOT NULL,
+  "voice_id" text,
   "created_at" timestamptz DEFAULT now() NOT NULL
 );
+
+ALTER TABLE "mirror_users" ADD COLUMN IF NOT EXISTS "voice_enabled" boolean DEFAULT false NOT NULL;
+ALTER TABLE "mirror_users" ADD COLUMN IF NOT EXISTS "voice_id" text;
 
 CREATE TABLE IF NOT EXISTS "mirror_agent_endpoints" (
   "id" text PRIMARY KEY NOT NULL,

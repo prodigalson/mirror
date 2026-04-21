@@ -6,6 +6,7 @@ import { requireSession } from "@/lib/auth";
 import { AGENT_TYPES } from "@/lib/agents";
 import AgentForm from "./agent-form";
 import AgentList from "./agent-list";
+import VoiceSection from "./voice-section";
 
 export default async function SettingsPage() {
   await ensureSchema();
@@ -28,6 +29,8 @@ export default async function SettingsPage() {
       </header>
 
       <div className="px-6 md:px-10 py-10 max-w-3xl w-full mx-auto space-y-12">
+        <VoiceSection />
+
         <section>
           <h2 className="font-serif text-3xl mb-2">Talk to your own agent</h2>
           <p className="text-ink-muted leading-relaxed mb-6">

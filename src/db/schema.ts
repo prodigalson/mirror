@@ -5,6 +5,8 @@ export const users = pgTable("mirror_users", {
   name: text("name").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   gbrainContext: boolean("gbrain_context").notNull().default(true),
+  voiceEnabled: boolean("voice_enabled").notNull().default(false),
+  voiceId: text("voice_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

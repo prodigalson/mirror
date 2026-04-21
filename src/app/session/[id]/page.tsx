@@ -10,6 +10,8 @@ import {
 import { requireSession } from "@/lib/auth";
 import { getMode } from "@/lib/modes";
 import { isGbrainEnabled } from "@/lib/gbrain";
+import { isElevenLabsConfigured } from "@/lib/elevenlabs";
+import { users } from "@/db/schema";
 import Chat from "./chat";
 
 export default async function SessionPage({
@@ -51,6 +53,13 @@ export default async function SessionPage({
   }
 
   const gbrainOn = isGbrainEnabled();
+  const voiceConfigured = isElevenLabsConfigured();
+
+  const profile = (
+    await db.select().from(users).where(eq(users.id, user.userId)).limit(1)
+  )[0];
+  const voiceEnabledDefault = profile?.voiceEnabled ?? false;
+  const voiceIdDefault = profile?.voiceId ?? null;
 
   return (
     <main className="flex-1 flex flex-col">
@@ -78,6 +87,9 @@ export default async function SessionPage({
         mode={mode}
         initialMessages={msgs}
         gbrainEnabled={gbrainOn}
+        voiceConfigured={voiceConfigured}
+        voiceEnabledDefault={voiceEnabledDefault}
+        voiceIdDefault={voiceIdDefault}
       />
     </main>
   );
