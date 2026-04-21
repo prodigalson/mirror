@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { desc, eq } from "drizzle-orm";
 import { db, ensureSchema } from "@/db";
-import { sessions as sessionsTable } from "@/db/schema";
+import { agentEndpoints, sessions as sessionsTable } from "@/db/schema";
 import { requireSession } from "@/lib/auth";
 import { getMode, MODES } from "@/lib/modes";
 import { isGbrainEnabled } from "@/lib/gbrain";
@@ -32,6 +32,12 @@ export default async function AppHome() {
     .where(eq(sessionsTable.userId, user.userId))
     .orderBy(desc(sessionsTable.updatedAt));
 
+  const agents = await db
+    .select()
+    .from(agentEndpoints)
+    .where(eq(agentEndpoints.userId, user.userId))
+    .orderBy(desc(agentEndpoints.createdAt));
+
   const gbrainOn = isGbrainEnabled();
 
   return (
@@ -47,6 +53,9 @@ export default async function AppHome() {
             {gbrainOn ? "gbrain connected" : "gbrain offline"}
           </div>
           <span className="text-ink-muted">Hi, {user.name}</span>
+          <Link href="/app/settings" className="text-ink-muted hover:text-ink transition">
+            Settings
+          </Link>
           <SignOut />
         </div>
       </header>
@@ -56,7 +65,10 @@ export default async function AppHome() {
         <p className="text-ink-muted mb-8">
           Say what you want to think about. Then pick a voice for the other you.
         </p>
-        <NewSession modes={MODES} />
+        <NewSession
+          modes={MODES}
+          agents={agents.map((a) => ({ id: a.id, name: a.name, type: a.type }))}
+        />
       </section>
 
       {rows.length > 0 && (

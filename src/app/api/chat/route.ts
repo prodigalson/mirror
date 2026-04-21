@@ -1,27 +1,34 @@
 import { NextRequest } from "next/server";
-import { eq, asc } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { v4 as uuid } from "uuid";
-import { db } from "@/db";
-import { messages as messagesTable, sessions as sessionsTable } from "@/db/schema";
+import { db, ensureSchema } from "@/db";
+import {
+  agentEndpoints,
+  messages as messagesTable,
+  sessions as sessionsTable,
+  type AgentEndpoint,
+} from "@/db/schema";
 import { requireSession } from "@/lib/auth";
 import { getMode } from "@/lib/modes";
 import { searchBrain } from "@/lib/gbrain";
 import { getAnthropic, MODEL } from "@/lib/anthropic";
+import { callOpenClawAgent } from "@/lib/adapters/openclaw";
+import { callWebhookAgent } from "@/lib/adapters/webhook";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 interface ChatRequest {
   sessionId: string;
   content: string;
 }
 
-function buildSystemPrompt(modeSystemPrompt: string, topic: string, snippets: Array<{ title: string; excerpt: string }>) {
-  const parts = [
-    modeSystemPrompt,
-    "",
-    `The topic of this session is: "${topic}"`,
-  ];
+function buildSystemPrompt(
+  modeSystemPrompt: string,
+  topic: string,
+  snippets: Array<{ title: string; excerpt: string }>
+) {
+  const parts = [modeSystemPrompt, "", `The topic of this session is: "${topic}"`];
   if (snippets.length > 0) {
     parts.push(
       "",
@@ -35,34 +42,71 @@ function buildSystemPrompt(modeSystemPrompt: string, topic: string, snippets: Ar
   return parts.join("\n");
 }
 
+function modePreamble(modeId: string, topic: string): string {
+  switch (modeId) {
+    case "brainstorm":
+      return `We're brainstorming "${topic}". Play the generative, creative voice. Speak in first person as me.`;
+    case "analyze":
+      return `Help me analyze: "${topic}". Be the clear, dispassionate voice in my head. Speak in first person as me.`;
+    case "decide":
+      return `I'm trying to decide about: "${topic}". Push me toward clarity. Speak in first person as me.`;
+    case "process":
+      return `I'm processing how I feel about: "${topic}". Witness, don't fix. Reflect in first person as me.`;
+    case "future":
+      return `Talk to me as my future self, five years from now, on this: "${topic}". First person.`;
+    case "critic":
+      return `Be my inner critic on this: "${topic}". Steelman the doubts. First person.`;
+    default:
+      return `Topic: "${topic}". Respond as me, talking to myself.`;
+  }
+}
+
 export async function POST(req: NextRequest) {
   let payload: ChatRequest;
   try {
     await requireSession();
+    await ensureSchema();
     payload = (await req.json()) as ChatRequest;
   } catch {
     return new Response("Unauthorized", { status: 401 });
   }
 
   const { sessionId, content } = payload;
-  if (!sessionId || !content) {
-    return new Response("Bad request", { status: 400 });
-  }
+  if (!sessionId || !content) return new Response("Bad request", { status: 400 });
 
-  const sessionRows = await db.select().from(sessionsTable).where(eq(sessionsTable.id, sessionId)).limit(1);
+  const sessionRows = await db
+    .select()
+    .from(sessionsTable)
+    .where(eq(sessionsTable.id, sessionId))
+    .limit(1);
   const session = sessionRows[0];
   if (!session) return new Response("Not found", { status: 404 });
 
   const mode = getMode(session.mode);
   if (!mode) return new Response("Invalid mode", { status: 400 });
 
-  const userMessage = {
-    id: uuid(),
+  let endpoint: AgentEndpoint | null = null;
+  if (session.agentEndpointId) {
+    const rows = await db
+      .select()
+      .from(agentEndpoints)
+      .where(
+        and(
+          eq(agentEndpoints.id, session.agentEndpointId),
+          eq(agentEndpoints.userId, session.userId)
+        )
+      )
+      .limit(1);
+    endpoint = rows[0] || null;
+  }
+
+  const userMessageId = uuid();
+  await db.insert(messagesTable).values({
+    id: userMessageId,
     sessionId,
     role: "user",
     content,
-  };
-  await db.insert(messagesTable).values(userMessage);
+  });
 
   const history = await db
     .select()
@@ -70,37 +114,81 @@ export async function POST(req: NextRequest) {
     .where(eq(messagesTable.sessionId, sessionId))
     .orderBy(asc(messagesTable.createdAt));
 
-  const existingMessageCount = history.length - 1;
-  const shouldFetchContext = existingMessageCount <= 1;
-  const snippets = shouldFetchContext ? await searchBrain(`${session.topic} ${content}`, 4) : [];
-  const systemPrompt = buildSystemPrompt(mode.systemPrompt, session.topic, snippets);
-
-  const apiMessages = history.map((m) => ({
-    role: m.role === "assistant" ? ("assistant" as const) : ("user" as const),
-    content: m.content,
-  }));
-
-  const client = getAnthropic();
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream({
     async start(controller) {
       const assistantId = uuid();
-      let fullText = "";
-      try {
-        controller.enqueue(encoder.encode(`event: start\ndata: ${JSON.stringify({ messageId: assistantId })}\n\n`));
-        const response = await client.messages.stream({
-          model: MODEL,
-          max_tokens: 1024,
-          system: systemPrompt,
-          messages: apiMessages,
-        });
+      const emit = (event: string, data: unknown) => {
+        controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
+      };
 
-        for await (const chunk of response) {
-          if (chunk.type === "content_block_delta" && chunk.delta.type === "text_delta") {
-            const t = chunk.delta.text;
-            fullText += t;
-            controller.enqueue(encoder.encode(`event: delta\ndata: ${JSON.stringify({ text: t })}\n\n`));
+      try {
+        emit("start", { messageId: assistantId, via: endpoint ? endpoint.name : "claude" });
+
+        let fullText = "";
+
+        if (endpoint) {
+          const firstTurn = history.filter((m) => m.role === "user").length === 1;
+          const prefixed = firstTurn
+            ? `${modePreamble(mode.id, session.topic)}\n\n${content}`
+            : content;
+
+          if (endpoint.type === "openclaw") {
+            const result = await callOpenClawAgent({
+              url: endpoint.url,
+              token: endpoint.token,
+              sessionKey: endpoint.sessionKey,
+              message: prefixed,
+              timeoutMs: 180_000,
+              signal: req.signal,
+            });
+            fullText = result.reply;
+            for (const chunk of chunkText(fullText, 24)) {
+              emit("delta", { text: chunk });
+            }
+          } else if (endpoint.type === "webhook") {
+            const result = await callWebhookAgent(
+              {
+                url: endpoint.url,
+                token: endpoint.token,
+                sessionKey: endpoint.sessionKey,
+                message: prefixed,
+                history: history.slice(0, -1).map((m) => ({ role: m.role, content: m.content })),
+                mode: mode.id,
+                signal: req.signal,
+              },
+              {
+                onDelta: (text) => emit("delta", { text }),
+              }
+            );
+            fullText = result.reply;
+          } else {
+            throw new Error(`Unsupported agent type: ${endpoint.type}`);
+          }
+        } else {
+          const shouldFetchContext = history.length <= 1;
+          const snippets = shouldFetchContext ? await searchBrain(`${session.topic} ${content}`, 4) : [];
+          const systemPrompt = buildSystemPrompt(mode.systemPrompt, session.topic, snippets);
+          const apiMessages = history.map((m) => ({
+            role: m.role === "assistant" ? ("assistant" as const) : ("user" as const),
+            content: m.content,
+          }));
+
+          const client = getAnthropic();
+          const response = await client.messages.stream({
+            model: MODEL,
+            max_tokens: 1024,
+            system: systemPrompt,
+            messages: apiMessages,
+          });
+
+          for await (const chunk of response) {
+            if (chunk.type === "content_block_delta" && chunk.delta.type === "text_delta") {
+              const t = chunk.delta.text;
+              fullText += t;
+              emit("delta", { text: t });
+            }
           }
         }
 
@@ -116,10 +204,10 @@ export async function POST(req: NextRequest) {
           .set({ updatedAt: new Date() })
           .where(eq(sessionsTable.id, sessionId));
 
-        controller.enqueue(encoder.encode(`event: done\ndata: ${JSON.stringify({ messageId: assistantId })}\n\n`));
+        emit("done", { messageId: assistantId });
       } catch (e) {
         const message = e instanceof Error ? e.message : "unknown error";
-        controller.enqueue(encoder.encode(`event: error\ndata: ${JSON.stringify({ error: message })}\n\n`));
+        emit("error", { error: message });
       } finally {
         controller.close();
       }
@@ -133,4 +221,10 @@ export async function POST(req: NextRequest) {
       Connection: "keep-alive",
     },
   });
+}
+
+function chunkText(text: string, size: number): string[] {
+  const chunks: string[] = [];
+  for (let i = 0; i < text.length; i += size) chunks.push(text.slice(i, i + size));
+  return chunks;
 }

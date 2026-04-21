@@ -1,13 +1,27 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Mode } from "@/lib/modes";
 
-export default function NewSession({ modes }: { modes: Mode[] }) {
+interface AgentOption {
+  id: string;
+  name: string;
+  type: string;
+}
+
+export default function NewSession({
+  modes,
+  agents,
+}: {
+  modes: Mode[];
+  agents: AgentOption[];
+}) {
   const router = useRouter();
   const [topic, setTopic] = useState("");
   const [mode, setMode] = useState<string>(modes[0].id);
+  const [agentId, setAgentId] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,7 +37,11 @@ export default function NewSession({ modes }: { modes: Mode[] }) {
       const res = await fetch("/api/sessions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic: clean, mode }),
+        body: JSON.stringify({
+          topic: clean,
+          mode,
+          agentEndpointId: agentId || null,
+        }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -70,6 +88,50 @@ export default function NewSession({ modes }: { modes: Mode[] }) {
           </button>
         ))}
       </div>
+
+      <div>
+        <p className="text-xs font-mono uppercase tracking-wider text-ink-faint mb-2">
+          Who replies
+        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setAgentId("")}
+            className={`px-3 py-1.5 rounded-full text-sm transition border ${
+              agentId === ""
+                ? "bg-ink text-paper border-ink"
+                : "bg-paper-soft/70 text-ink-muted border-thread/50 hover:border-ink/50 hover:text-ink"
+            }`}
+          >
+            Claude (default)
+          </button>
+          {agents.map((a) => (
+            <button
+              key={a.id}
+              type="button"
+              onClick={() => setAgentId(a.id)}
+              className={`px-3 py-1.5 rounded-full text-sm transition border ${
+                agentId === a.id
+                  ? "bg-ink text-paper border-ink"
+                  : "bg-paper-soft/70 text-ink-muted border-thread/50 hover:border-ink/50 hover:text-ink"
+              }`}
+              title={a.type}
+            >
+              {a.name}{" "}
+              <span className="text-xs opacity-60 font-mono ml-1">{a.type}</span>
+            </button>
+          ))}
+          {agents.length === 0 && (
+            <Link
+              href="/app/settings"
+              className="text-sm text-ink-faint hover:text-ink underline decoration-thread underline-offset-4 transition"
+            >
+              + connect your own agent
+            </Link>
+          )}
+        </div>
+      </div>
+
       {error && <p className="text-sm text-rose-accent">{error}</p>}
       <div className="flex items-center justify-between">
         <p className="text-xs text-ink-faint font-mono">

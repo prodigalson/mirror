@@ -2,7 +2,11 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { and, asc, eq } from "drizzle-orm";
 import { db, ensureSchema } from "@/db";
-import { sessions as sessionsTable, messages as messagesTable } from "@/db/schema";
+import {
+  agentEndpoints,
+  sessions as sessionsTable,
+  messages as messagesTable,
+} from "@/db/schema";
 import { requireSession } from "@/lib/auth";
 import { getMode } from "@/lib/modes";
 import { isGbrainEnabled } from "@/lib/gbrain";
@@ -34,6 +38,18 @@ export default async function SessionPage({
     .where(eq(messagesTable.sessionId, id))
     .orderBy(asc(messagesTable.createdAt));
 
+  let agentName: string | null = null;
+  if (session.agentEndpointId) {
+    const agent = (
+      await db
+        .select()
+        .from(agentEndpoints)
+        .where(eq(agentEndpoints.id, session.agentEndpointId))
+        .limit(1)
+    )[0];
+    if (agent) agentName = `${agent.name} · ${agent.type}`;
+  }
+
   const gbrainOn = isGbrainEnabled();
 
   return (
@@ -48,6 +64,11 @@ export default async function SessionPage({
             style={{ background: `var(--color-${mode.accent}-accent)` }}
           />
           <span className="font-serif text-lg">{mode.name}</span>
+          {agentName && (
+            <span className="text-xs font-mono text-ink-faint hidden md:inline">
+              via {agentName}
+            </span>
+          )}
         </div>
         <div className="w-20" />
       </header>
