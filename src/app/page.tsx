@@ -39,8 +39,8 @@ export default async function Home() {
             Chat with yourself.
           </h1>
           <p className="text-lg md:text-xl text-ink-muted leading-relaxed max-w-xl mx-auto mb-10">
-            Mirror is an AI agent that simulates being you so you can have a deeper or
-            more productive conversation (versus a typical LLM).
+            Mirror is an AI agent that simulates being you so you can have a deeper
+            conversation.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <a
