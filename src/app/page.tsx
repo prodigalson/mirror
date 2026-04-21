@@ -35,15 +35,12 @@ export default async function Home() {
 
       <section className="flex-1 flex flex-col items-center justify-center px-6 py-16 text-center">
         <div className="max-w-2xl">
-          <p className="font-mono text-xs tracking-[0.2em] text-ink-faint uppercase mb-6">
-            A skill for your agent
-          </p>
           <h1 className="font-serif text-5xl md:text-6xl leading-[1.05] text-ink mb-6">
             Chat with yourself.
           </h1>
           <p className="text-lg md:text-xl text-ink-muted leading-relaxed max-w-xl mx-auto mb-10">
-            The most honest conversation is the one in your own head. Mirror makes it
-            two-sided.
+            Mirror is an AI agent that simulates being you so you can have a deeper or
+            more productive conversation (versus a typical LLM).
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <a
