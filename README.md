@@ -20,38 +20,34 @@ Connect your gbrain and Mirror pulls context from your own past writing, so the 
 - Next.js 16 (App Router, Turbopack)
 - React 19, Tailwind 4
 - Anthropic API (Claude Sonnet 4.6) with streaming
-- SQLite via libsql/Turso for session storage
-- Drizzle ORM
-- gbrain postgres for context + persistence (optional)
+- Postgres with Drizzle ORM (reuses your gbrain database by default)
 
 ## Run locally
 
 ```bash
 bun install
 cp .env.example .env.local
-# edit .env.local to add ANTHROPIC_API_KEY and JWT_SECRET
-bun run db:migrate
+# edit .env.local to add ANTHROPIC_API_KEY, JWT_SECRET, DATABASE_URL
 bun run dev
 ```
 
-Open http://localhost:3000 and sign up with any name + password (first login creates your account).
+Tables are created automatically on first request. Open http://localhost:3000 and sign up with any name + password.
 
 ## Connect gbrain
 
-Set `GBRAIN_DATABASE_URL` to your gbrain Postgres connection string. Mirror will:
+Mirror reads from your gbrain Postgres. By default it uses `DATABASE_URL`; if your gbrain is on a different DB, set `GBRAIN_DATABASE_URL`.
 
-1. Search your gbrain pages when you start a session, mix relevant excerpts into the other-you's context
-2. Let you save each completed session as a `mirror-session` page in your brain
+When connected, Mirror:
 
-Without `GBRAIN_DATABASE_URL`, Mirror still works - the other-you just doesn't have access to your past writing.
+1. Searches your brain when you start a session and weaves relevant excerpts into the other-you's context
+2. Lets you save each completed session back to your brain as a `mirror-session` page
 
-## Deploy
+## Deploy to Vercel
 
-Works out of the box on Vercel. Set these environment variables:
+Set these environment variables in the Vercel project:
 
 - `ANTHROPIC_API_KEY`
 - `JWT_SECRET` (any long random string)
-- `TURSO_DATABASE_URL` + `TURSO_AUTH_TOKEN` (create a free DB at turso.tech)
-- `GBRAIN_DATABASE_URL` (optional)
+- `DATABASE_URL` (your gbrain postgres URL works perfectly - Mirror uses separate `mirror_*` tables)
 
-Run migrations against your Turso DB once: `TURSO_DATABASE_URL=... TURSO_AUTH_TOKEN=... bun run db:migrate`
+That's it. Push, it deploys, tables self-initialize on first request.

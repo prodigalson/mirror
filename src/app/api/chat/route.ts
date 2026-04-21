@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
 
         await db
           .update(sessionsTable)
-          .set({ updatedAt: new Date().toISOString() })
+          .set({ updatedAt: new Date() })
           .where(eq(sessionsTable.id, sessionId));
 
         controller.enqueue(encoder.encode(`event: done\ndata: ${JSON.stringify({ messageId: assistantId })}\n\n`));

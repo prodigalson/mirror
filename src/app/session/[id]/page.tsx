@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { and, asc, eq } from "drizzle-orm";
-import { db } from "@/db";
+import { db, ensureSchema } from "@/db";
 import { sessions as sessionsTable, messages as messagesTable } from "@/db/schema";
 import { requireSession } from "@/lib/auth";
 import { getMode } from "@/lib/modes";
@@ -13,6 +13,7 @@ export default async function SessionPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  await ensureSchema();
   const user = await requireSession();
   const { id } = await params;
 

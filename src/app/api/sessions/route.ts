@@ -42,7 +42,6 @@ export async function POST(req: NextRequest) {
 
   const id = uuid();
   const title = topic.length > 80 ? topic.slice(0, 77) + "..." : topic;
-  const now = new Date().toISOString();
 
   await db.insert(sessionsTable).values({
     id,
@@ -50,8 +49,6 @@ export async function POST(req: NextRequest) {
     title,
     mode: mode.id,
     topic,
-    createdAt: now,
-    updatedAt: now,
   });
 
   return Response.json({ id });

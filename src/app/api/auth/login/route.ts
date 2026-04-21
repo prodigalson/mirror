@@ -2,13 +2,14 @@ import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { eq } from "drizzle-orm";
 import { v4 as uuid } from "uuid";
-import { db } from "@/db";
+import { db, ensureSchema } from "@/db";
 import { users } from "@/db/schema";
 import { comparePassword, hashPassword, sessionCookie, signToken } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
+  await ensureSchema();
   const body = (await req.json()) as { name?: string; password?: string };
   const name = (body.name || "").trim().toLowerCase();
   const password = body.password || "";

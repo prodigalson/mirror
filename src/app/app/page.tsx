@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { desc, eq } from "drizzle-orm";
-import { db } from "@/db";
+import { db, ensureSchema } from "@/db";
 import { sessions as sessionsTable } from "@/db/schema";
 import { requireSession } from "@/lib/auth";
 import { getMode, MODES } from "@/lib/modes";
@@ -8,8 +8,8 @@ import { isGbrainEnabled } from "@/lib/gbrain";
 import NewSession from "./new-session";
 import SignOut from "./sign-out";
 
-function timeAgo(iso: string): string {
-  const d = new Date(iso.replace(" ", "T") + (iso.includes("Z") ? "" : "Z"));
+function timeAgo(value: Date | string): string {
+  const d = typeof value === "string" ? new Date(value) : value;
   const ms = Date.now() - d.getTime();
   const min = Math.floor(ms / 60000);
   if (min < 1) return "just now";
@@ -24,6 +24,7 @@ function timeAgo(iso: string): string {
 }
 
 export default async function AppHome() {
+  await ensureSchema();
   const user = await requireSession();
   const rows = await db
     .select()
