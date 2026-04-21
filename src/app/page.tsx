@@ -42,26 +42,8 @@ export default async function Home() {
             Chat with yourself.
           </h1>
           <p className="text-lg md:text-xl text-ink-muted leading-relaxed max-w-xl mx-auto mb-10">
-            The most honest conversation is the one in your own head. Mirror is a{" "}
-            <a
-              href="https://github.com/garrytan/gbrain"
-              className="underline decoration-thread underline-offset-4 hover:text-ink"
-              target="_blank"
-              rel="noreferrer noopener"
-            >
-              gbrain
-            </a>
-            -aware{" "}
-            <a
-              href="https://openclaw.ai"
-              className="underline decoration-thread underline-offset-4 hover:text-ink"
-              target="_blank"
-              rel="noreferrer noopener"
-            >
-              OpenClaw
-            </a>
-            {" "}skill that facilitates an inner dialogue with you — right in whatever chat
-            you already use to talk to your agent.
+            The most honest conversation is the one in your own head. Mirror makes it
+            two-sided.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <a
