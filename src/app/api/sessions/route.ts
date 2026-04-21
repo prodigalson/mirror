@@ -37,6 +37,7 @@ export async function POST(req: NextRequest) {
     mode: string;
     topic: string;
     agentEndpointId?: string | null;
+    provider?: string | null;
   };
   const mode = getMode(body.mode);
   if (!mode) return new Response("Invalid mode", { status: 400 });
@@ -65,6 +66,9 @@ export async function POST(req: NextRequest) {
   const id = uuid();
   const title = topic.length > 80 ? topic.slice(0, 77) + "..." : topic;
 
+  const providerChoice =
+    body.provider === "anthropic" || body.provider === "openai" ? body.provider : null;
+
   await db.insert(sessionsTable).values({
     id,
     userId: user.userId,
@@ -72,6 +76,7 @@ export async function POST(req: NextRequest) {
     mode: mode.id,
     topic,
     agentEndpointId,
+    provider: providerChoice,
   });
 
   return Response.json({ id });

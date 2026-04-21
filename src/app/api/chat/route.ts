@@ -6,14 +6,20 @@ import {
   agentEndpoints,
   messages as messagesTable,
   sessions as sessionsTable,
+  users,
   type AgentEndpoint,
 } from "@/db/schema";
 import { requireSession } from "@/lib/auth";
 import { getMode } from "@/lib/modes";
 import { searchBrain } from "@/lib/gbrain";
-import { getAnthropic, MODEL } from "@/lib/anthropic";
 import { callOpenClawAgent } from "@/lib/adapters/openclaw";
 import { callWebhookAgent } from "@/lib/adapters/webhook";
+import {
+  isValidProvider,
+  resolveProvider,
+  streamProviderChat,
+  type ProviderId,
+} from "@/lib/providers";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -167,29 +173,48 @@ export async function POST(req: NextRequest) {
             throw new Error(`Unsupported agent type: ${endpoint.type}`);
           }
         } else {
+          const userRow = (
+            await db.select().from(users).where(eq(users.id, session.userId)).limit(1)
+          )[0];
+          const preferred: ProviderId | null =
+            session.provider && isValidProvider(session.provider) ? session.provider : null;
+          const resolved = resolveProvider(
+            {
+              anthropicKey: userRow?.anthropicKey ?? null,
+              openaiKey: userRow?.openaiKey ?? null,
+              providerDefault: userRow?.providerDefault ?? null,
+            },
+            preferred
+          );
+          if (!resolved) {
+            throw new Error(
+              "No LLM provider configured. Add an Anthropic or OpenAI API key in Settings."
+            );
+          }
+
+          emit("provider", { provider: resolved.provider, source: resolved.source });
+
           const shouldFetchContext = history.length <= 1;
-          const snippets = shouldFetchContext ? await searchBrain(`${session.topic} ${content}`, 4) : [];
+          const snippets = shouldFetchContext
+            ? await searchBrain(`${session.topic} ${content}`, 4)
+            : [];
           const systemPrompt = buildSystemPrompt(mode.systemPrompt, session.topic, snippets);
           const apiMessages = history.map((m) => ({
             role: m.role === "assistant" ? ("assistant" as const) : ("user" as const),
             content: m.content,
           }));
 
-          const client = getAnthropic();
-          const response = await client.messages.stream({
-            model: MODEL,
-            max_tokens: 1024,
+          await streamProviderChat({
+            provider: resolved.provider,
+            apiKey: resolved.apiKey,
             system: systemPrompt,
             messages: apiMessages,
+            signal: req.signal,
+            onDelta: (text) => {
+              fullText += text;
+              emit("delta", { text });
+            },
           });
-
-          for await (const chunk of response) {
-            if (chunk.type === "content_block_delta" && chunk.delta.type === "text_delta") {
-              const t = chunk.delta.text;
-              fullText += t;
-              emit("delta", { text: t });
-            }
-          }
         }
 
         await db.insert(messagesTable).values({

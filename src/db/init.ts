@@ -10,11 +10,17 @@ CREATE TABLE IF NOT EXISTS "mirror_users" (
   "gbrain_context" boolean DEFAULT true NOT NULL,
   "voice_enabled" boolean DEFAULT false NOT NULL,
   "voice_id" text,
+  "anthropic_key_encrypted" text,
+  "openai_key_encrypted" text,
+  "provider_default" text,
   "created_at" timestamptz DEFAULT now() NOT NULL
 );
 
 ALTER TABLE "mirror_users" ADD COLUMN IF NOT EXISTS "voice_enabled" boolean DEFAULT false NOT NULL;
 ALTER TABLE "mirror_users" ADD COLUMN IF NOT EXISTS "voice_id" text;
+ALTER TABLE "mirror_users" ADD COLUMN IF NOT EXISTS "anthropic_key_encrypted" text;
+ALTER TABLE "mirror_users" ADD COLUMN IF NOT EXISTS "openai_key_encrypted" text;
+ALTER TABLE "mirror_users" ADD COLUMN IF NOT EXISTS "provider_default" text;
 
 CREATE TABLE IF NOT EXISTS "mirror_agent_endpoints" (
   "id" text PRIMARY KEY NOT NULL,
@@ -41,6 +47,7 @@ CREATE TABLE IF NOT EXISTS "mirror_sessions" (
 );
 
 ALTER TABLE "mirror_sessions" ADD COLUMN IF NOT EXISTS "agent_endpoint_id" text REFERENCES "mirror_agent_endpoints"("id") ON DELETE SET NULL;
+ALTER TABLE "mirror_sessions" ADD COLUMN IF NOT EXISTS "provider" text;
 
 CREATE TABLE IF NOT EXISTS "mirror_messages" (
   "id" text PRIMARY KEY NOT NULL,

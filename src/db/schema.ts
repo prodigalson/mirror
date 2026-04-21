@@ -7,6 +7,9 @@ export const users = pgTable("mirror_users", {
   gbrainContext: boolean("gbrain_context").notNull().default(true),
   voiceEnabled: boolean("voice_enabled").notNull().default(false),
   voiceId: text("voice_id"),
+  anthropicKey: text("anthropic_key_encrypted"),
+  openaiKey: text("openai_key_encrypted"),
+  providerDefault: text("provider_default"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -40,6 +43,7 @@ export const sessions = pgTable("mirror_sessions", {
   agentEndpointId: text("agent_endpoint_id").references(() => agentEndpoints.id, {
     onDelete: "set null",
   }),
+  provider: text("provider"),
   savedToBrain: boolean("saved_to_brain").notNull().default(false),
   brainSlug: text("brain_slug"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

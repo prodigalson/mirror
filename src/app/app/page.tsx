@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { desc, eq } from "drizzle-orm";
 import { db, ensureSchema } from "@/db";
-import { agentEndpoints, sessions as sessionsTable } from "@/db/schema";
+import { agentEndpoints, sessions as sessionsTable, users } from "@/db/schema";
 import { requireSession } from "@/lib/auth";
 import { getMode, MODES } from "@/lib/modes";
 import { isGbrainEnabled } from "@/lib/gbrain";
@@ -38,6 +38,15 @@ export default async function AppHome() {
     .where(eq(agentEndpoints.userId, user.userId))
     .orderBy(desc(agentEndpoints.createdAt));
 
+  const profile = (await db.select().from(users).where(eq(users.id, user.userId)).limit(1))[0];
+  const providers = {
+    anthropic: !!profile?.anthropicKey,
+    openai: !!profile?.openaiKey,
+    default: profile?.providerDefault ?? null,
+  };
+  const hasUserProvider = providers.anthropic || providers.openai;
+  const hasServerFallback = !!process.env.ANTHROPIC_API_KEY;
+
   const gbrainOn = isGbrainEnabled();
 
   return (
@@ -65,9 +74,21 @@ export default async function AppHome() {
         <p className="text-ink-muted mb-8">
           Say what you want to think about. Then pick a voice for the other you.
         </p>
+        {!hasUserProvider && !hasServerFallback && (
+          <div className="mb-6 p-4 rounded-xl bg-paper-soft/60 border border-amber-accent/40">
+            <p className="text-sm text-ink leading-relaxed">
+              Add your Anthropic or OpenAI API key in{" "}
+              <Link href="/app/settings" className="underline decoration-amber-accent underline-offset-4">
+                Settings
+              </Link>{" "}
+              to start chatting. Mirror runs on your key, not ours.
+            </p>
+          </div>
+        )}
         <NewSession
           modes={MODES}
           agents={agents.map((a) => ({ id: a.id, name: a.name, type: a.type }))}
+          providers={providers}
         />
       </section>
 

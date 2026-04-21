@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 const PROTECTED_PATHS = ["/app", "/session"];
-const PROTECTED_API = ["/api/sessions", "/api/chat", "/api/agents", "/api/voice"];
+const PROTECTED_API = ["/api/sessions", "/api/chat", "/api/agents", "/api/voice", "/api/providers"];
 
 export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -29,5 +29,6 @@ export const config = {
     "/api/chat",
     "/api/agents/:path*",
     "/api/voice/:path*",
+    "/api/providers",
   ],
 };

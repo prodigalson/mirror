@@ -11,17 +11,34 @@ interface AgentOption {
   type: string;
 }
 
+interface ProvidersInfo {
+  anthropic: boolean;
+  openai: boolean;
+  default: string | null;
+}
+
+type TalkTo =
+  | { kind: "provider"; id: "anthropic" | "openai" | "auto" }
+  | { kind: "agent"; id: string };
+
 export default function NewSession({
   modes,
   agents,
+  providers,
 }: {
   modes: Mode[];
   agents: AgentOption[];
+  providers: ProvidersInfo;
 }) {
   const router = useRouter();
   const [topic, setTopic] = useState("");
   const [mode, setMode] = useState<string>(modes[0].id);
-  const [agentId, setAgentId] = useState<string>("");
+  const initialTalkTo: TalkTo = providers.anthropic || providers.openai
+    ? { kind: "provider", id: "auto" }
+    : agents[0]
+      ? { kind: "agent", id: agents[0].id }
+      : { kind: "provider", id: "auto" };
+  const [talkTo, setTalkTo] = useState<TalkTo>(initialTalkTo);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,14 +51,16 @@ export default function NewSession({
     setError(null);
     setLoading(true);
     try {
+      const body: Record<string, unknown> = { topic: clean, mode };
+      if (talkTo.kind === "agent") {
+        body.agentEndpointId = talkTo.id;
+      } else if (talkTo.kind === "provider" && talkTo.id !== "auto") {
+        body.provider = talkTo.id;
+      }
       const res = await fetch("/api/sessions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          topic: clean,
-          mode,
-          agentEndpointId: agentId || null,
-        }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -94,39 +113,47 @@ export default function NewSession({
           Who replies
         </p>
         <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setAgentId("")}
-            className={`px-3 py-1.5 rounded-full text-sm transition border ${
-              agentId === ""
-                ? "bg-ink text-paper border-ink"
-                : "bg-paper-soft/70 text-ink-muted border-thread/50 hover:border-ink/50 hover:text-ink"
-            }`}
-          >
-            Claude (default)
-          </button>
+          {(providers.anthropic || providers.openai) && (
+            <PillButton
+              active={talkTo.kind === "provider" && talkTo.id === "auto"}
+              onClick={() => setTalkTo({ kind: "provider", id: "auto" })}
+            >
+              your default
+            </PillButton>
+          )}
+          {providers.anthropic && (
+            <PillButton
+              active={talkTo.kind === "provider" && talkTo.id === "anthropic"}
+              onClick={() => setTalkTo({ kind: "provider", id: "anthropic" })}
+            >
+              Claude (your key)
+            </PillButton>
+          )}
+          {providers.openai && (
+            <PillButton
+              active={talkTo.kind === "provider" && talkTo.id === "openai"}
+              onClick={() => setTalkTo({ kind: "provider", id: "openai" })}
+            >
+              OpenAI (your key)
+            </PillButton>
+          )}
           {agents.map((a) => (
-            <button
+            <PillButton
               key={a.id}
-              type="button"
-              onClick={() => setAgentId(a.id)}
-              className={`px-3 py-1.5 rounded-full text-sm transition border ${
-                agentId === a.id
-                  ? "bg-ink text-paper border-ink"
-                  : "bg-paper-soft/70 text-ink-muted border-thread/50 hover:border-ink/50 hover:text-ink"
-              }`}
+              active={talkTo.kind === "agent" && talkTo.id === a.id}
+              onClick={() => setTalkTo({ kind: "agent", id: a.id })}
               title={a.type}
             >
               {a.name}{" "}
               <span className="text-xs opacity-60 font-mono ml-1">{a.type}</span>
-            </button>
+            </PillButton>
           ))}
-          {agents.length === 0 && (
+          {!providers.anthropic && !providers.openai && agents.length === 0 && (
             <Link
               href="/app/settings"
               className="text-sm text-ink-faint hover:text-ink underline decoration-thread underline-offset-4 transition"
             >
-              + connect your own agent
+              + add a provider key or agent
             </Link>
           )}
         </div>
@@ -147,5 +174,32 @@ export default function NewSession({
         </button>
       </div>
     </div>
+  );
+}
+
+function PillButton({
+  active,
+  onClick,
+  children,
+  title,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+  title?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      className={`px-3 py-1.5 rounded-full text-sm transition border ${
+        active
+          ? "bg-ink text-paper border-ink"
+          : "bg-paper-soft/70 text-ink-muted border-thread/50 hover:border-ink/50 hover:text-ink"
+      }`}
+    >
+      {children}
+    </button>
   );
 }

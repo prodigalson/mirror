@@ -54,9 +54,10 @@ Open http://localhost:3000 and sign up. Tables self-initialize on first request.
 ### Features in the web app
 
 - Same six modes as the skill
+- **Bring your own key.** Users paste their Anthropic or OpenAI API key in Settings. Chat runs on their quota, not yours. Keys are AES-GCM encrypted at rest with a key derived from `JWT_SECRET`.
 - gbrain context pull + save-to-brain (set `GBRAIN_DATABASE_URL` or reuse `DATABASE_URL`)
 - Voice in and voice out via ElevenLabs (set `ELEVENLABS_API_KEY`)
-- External agent endpoints: route a session through your OpenClaw gateway or a webhook instead of Claude direct
+- External agent endpoints: route a session through your OpenClaw gateway or a webhook instead of a direct provider call
 
 ### Stack
 
@@ -68,11 +69,11 @@ Open http://localhost:3000 and sign up. Tables self-initialize on first request.
 ### Deploy to Vercel
 
 ```
-ANTHROPIC_API_KEY       - required
-JWT_SECRET              - any long random string
-DATABASE_URL            - your gbrain postgres URL works (Mirror uses separate mirror_* tables)
+JWT_SECRET              - required, any long random string (also used to encrypt user keys)
+DATABASE_URL            - required, your gbrain postgres URL works (Mirror uses separate mirror_* tables)
+ANTHROPIC_API_KEY       - optional, used only as a shared fallback for users who haven't added their own key
 ELEVENLABS_API_KEY      - optional, enables voice mode
 GBRAIN_DATABASE_URL     - optional, if separate from DATABASE_URL
 ```
 
-Push, it deploys, tables self-initialize on first request.
+Push, it deploys, tables self-initialize on first request. Without a server `ANTHROPIC_API_KEY`, users must add their own key in Settings before chatting, which means you pay zero for their inference.

@@ -179,9 +179,9 @@ export default async function Home() {
             <div className="p-6 rounded-xl bg-paper-soft/60 border border-thread/40">
               <h3 className="font-serif text-2xl mb-2">As a web app</h3>
               <p className="text-sm text-ink-muted leading-relaxed mb-4">
-                If you don&apos;t have an agent set up, or want a shareable URL for a
-                browser-only self-chat session, run it here. Pulls from gbrain. Optional
-                ElevenLabs voice. Optional bring-your-own agent endpoint.
+                Sign in and paste your own Anthropic or OpenAI API key. Chat runs on your
+                quota, not ours. Pulls from gbrain, optional ElevenLabs voice, optional
+                routing through your OpenClaw or webhook agent.
               </p>
               <Link
                 href={session ? "/app" : "/login"}
