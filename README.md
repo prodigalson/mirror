@@ -34,13 +34,13 @@ Then, in your usual chat channel (Telegram, WhatsApp, Signal, Discord, iMessage,
 
 > mirror session on whether I should write more in public
 
-The skill takes over, asks what mode you want, pulls context from your gbrain, drives the conversation, and saves the transcript to your brain when you wrap. Works with voice channels too — the agent's native voice pipeline does the talking.
+The skill takes over, asks what mode you want, pulls context from your gbrain, drives the conversation, and saves the transcript to your brain when you wrap. Works with voice channels too - the agent's native voice pipeline does the talking.
 
 **Requirements:** `gbrain` CLI on the same host (the skill shells out to it for context and saving).
 
 ## Run the web app (alternative)
 
-Standalone Next.js app — useful if you don't have an agent set up, want a shareable link, or want to bring your own external agent endpoint (OpenClaw gateway, Hermes, or any webhook) without touching a CLI.
+Standalone Next.js app - useful if you don't have an agent set up, want a shareable link, or want to bring your own external agent endpoint (OpenClaw gateway, Hermes, or any webhook) without touching a CLI.
 
 ```bash
 bun install

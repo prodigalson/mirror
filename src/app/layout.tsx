@@ -19,7 +19,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mirror — chat with yourself",
+  title: "Mirror - chat with yourself",
   description:
     "A quiet place to think out loud. Brainstorm, analyze, decide, or just sit with what you're feeling, in dialogue with a version of yourself.",
 };
