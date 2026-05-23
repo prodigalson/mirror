@@ -44,7 +44,7 @@ const steps = [
 export default async function Home() {
   return (
     <main className="min-h-screen flex flex-col bg-paper-100 text-paper-900 subtle-grain overflow-hidden">
-      <header className="w-full px-6 py-8 flex justify-between items-center max-w-7xl mx-auto z-10">
+      <header className="w-full px-6 py-6 md:py-8 flex justify-between items-center max-w-7xl mx-auto z-10">
         <Link
           href="/"
           className="flex items-center gap-2 font-serif text-2xl tracking-tight text-paper-900 italic font-medium"
@@ -64,14 +64,14 @@ export default async function Home() {
         </nav>
       </header>
 
-      <section className="flex-grow flex flex-col items-center pt-12 pb-28">
+      <section className="flex-grow flex flex-col items-center pt-4 md:pt-2 pb-28">
         <MirrorHeroImage />
 
         <div className="max-w-3xl mx-auto px-6 text-center z-10">
-          <h1 className="font-serif text-5xl md:text-7xl font-normal tracking-tight leading-[1.05] mb-6 text-paper-900">
+          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-normal tracking-tight leading-[1.05] mb-4 md:mb-5 text-paper-900">
             Chat with yourself.
           </h1>
-          <p className="text-lg md:text-xl text-paper-800/60 font-light max-w-xl mx-auto mb-10 leading-relaxed">
+          <p className="text-base md:text-xl text-paper-800/60 font-light max-w-xl mx-auto mb-6 md:mb-7 leading-relaxed">
             Mirror is an AI agent that simulates being you so you can have a deeper
             conversation.
           </p>
@@ -107,13 +107,13 @@ export default async function Home() {
 
 function MirrorHeroImage() {
   return (
-    <div className="relative mb-10 px-4">
-      <div className="w-[230px] h-[390px] md:w-[300px] md:h-[500px] relative z-10">
+    <div className="relative mb-6 px-4">
+      <div className="h-[clamp(260px,40vh,390px)] md:h-[clamp(280px,38vh,460px)] relative z-10 flex justify-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/images/reflect-mirror-cutout.png"
           alt="Elegant oval gold-framed mirror"
-          className="w-full h-full object-contain drop-shadow-2xl"
+          className="h-full w-auto max-w-[78vw] object-contain drop-shadow-2xl"
         />
       </div>
     </div>
