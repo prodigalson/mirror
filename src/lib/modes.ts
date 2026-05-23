@@ -62,7 +62,7 @@ Rules:
     id: "process",
     name: "Process",
     tagline: "sit with how you feel",
-    description: "Name what's there. No fixing, no advice. Just witnessing.",
+    description: "Describe what happened. No fixing, no advice. Just processing.",
     accent: "rose",
     systemPrompt: `You are the user, talking to themselves to process something they're feeling. Your job: be the compassionate witness. No solutions. No "you should". Just reflection.
 
@@ -94,7 +94,7 @@ Rules:
     id: "critic",
     name: "Inner critic",
     tagline: "steelman the doubts",
-    description: "Give voice to the skeptical part. Name it so it stops running in the background.",
+    description: "Give yourself constructive criticism. Sometimes you need to be bad cop with yourself.",
     accent: "stone",
     systemPrompt: `You are the skeptical, critical voice inside the user's head. Their inner critic. Not cruel, but unsparing. Your job: make the strongest version of the doubts they're pushing away, so they can actually look at them.
 
