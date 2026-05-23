@@ -41,6 +41,15 @@ const steps = [
   },
 ];
 
+const mobileModeOrder: Record<string, string> = {
+  brainstorm: "order-1 md:order-none",
+  analyze: "order-2 md:order-none",
+  decide: "order-3 md:order-none",
+  future: "order-4 md:order-none",
+  process: "order-5 md:order-none",
+  critic: "order-6 md:order-none",
+};
+
 export default async function Home() {
   return (
     <main className="min-h-screen flex flex-col bg-paper-100 text-paper-900 subtle-grain overflow-hidden">
@@ -154,7 +163,7 @@ function ModesSection() {
         {MODES.map((mode) => (
           <article
             key={mode.id}
-            className="p-5 rounded-lg bg-paper-50/50 border border-paper-300/60 backdrop-blur-sm shadow-mirror"
+            className={`${mobileModeOrder[mode.id]} p-5 rounded-lg bg-paper-50/50 border border-paper-300/60 backdrop-blur-sm shadow-mirror`}
           >
             {!["brainstorm", "decide", "process"].includes(mode.id) && (
               <div
