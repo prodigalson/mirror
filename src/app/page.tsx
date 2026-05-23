@@ -156,10 +156,12 @@ function ModesSection() {
             key={mode.id}
             className="p-5 rounded-lg bg-paper-50/50 border border-paper-300/60 backdrop-blur-sm shadow-mirror"
           >
-            <div
-              className="w-2 h-2 rounded-full mb-3"
-              style={{ background: `var(--color-${mode.accent}-accent)` }}
-            />
+            {!["brainstorm", "decide", "process"].includes(mode.id) && (
+              <div
+                className="w-2 h-2 rounded-full mb-3"
+                style={{ background: `var(--color-${mode.accent}-accent)` }}
+              />
+            )}
             <h3 className="font-serif text-2xl mb-1 text-paper-900">{mode.name}</h3>
             <p className="text-xs font-mono uppercase tracking-wider text-paper-800/40 mb-3">
               {mode.tagline}
