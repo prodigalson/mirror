@@ -133,9 +133,6 @@ export default async function Home() {
 function MirrorHeroImage() {
   return (
     <div className="relative mb-16 px-4">
-      <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-[2px] h-8 bg-paper-300" />
-      <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-paper-300" />
-
       <div className="w-[200px] h-[340px] md:w-[260px] md:h-[440px] relative z-10 rounded-[1000px] shadow-2xl overflow-hidden bg-paper-200">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
