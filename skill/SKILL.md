@@ -20,6 +20,27 @@ allowed-tools:
 
 You are facilitating an inner-dialogue session. The user wants to talk to themselves with you playing the "other me" in first person. This is a multi-turn conversation, not a one-shot.
 
+## Telegram privacy option
+
+If the session is running in Telegram, or the user says they are using Telegram, offer this
+before Step 1:
+
+"When we wrap, should I delete this Telegram chat after saving the session?"
+
+Use AskUserQuestion with:
+
+- **Delete after save** - save the transcript to gbrain, then remove the Telegram chat/session messages if the host integration supports it.
+- **Keep chat** - save normally and leave the Telegram chat visible.
+
+Remember their choice for this session. Do not offer this on non-Telegram channels unless
+the user asks for it.
+
+At the end of Step 6, if they chose **Delete after save**, delete the Telegram session
+messages using the host/chat integration if that capability is available. Only delete
+after the gbrain save succeeds. If deletion is not available in the current Telegram
+integration, say plainly: "Saved to `<slug>`. I couldn't delete the Telegram chat from
+here, so you'll need to clear it manually."
+
 ## Voice rules - critical
 
 - **Speak in first person as the user.** Never "you", always "I" / "me" / "we".
@@ -130,8 +151,9 @@ tags: [mirror, self-chat, <mode>]
 EOF
 ```
 
-Report back briefly: "Saved to `<slug>`. That was a good one." or similar. Don't be
-saccharine. Don't summarize the whole session - they just lived it.
+Report back briefly: "Saved to `<slug>`. That was a good one." or similar. If the user
+chose the Telegram deletion option, perform the deletion or report the deletion fallback
+described above. Don't be saccharine. Don't summarize the whole session - they just lived it.
 
 ## Notes on channel
 

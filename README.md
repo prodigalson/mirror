@@ -36,6 +36,11 @@ Then, in your usual chat channel (Telegram, WhatsApp, Signal, Discord, iMessage,
 
 The skill takes over, asks what mode you want, pulls context from your gbrain, drives the conversation, and saves the transcript to your brain when you wrap. Works with voice channels too - the agent's native voice pipeline does the talking.
 
+If you run Mirror in Telegram, it can ask whether to delete the Telegram chat after the
+session is saved. Deletion depends on the Telegram/OpenClaw host integration exposing
+message deletion; if it cannot delete from there, Mirror will say so and leave the saved
+gbrain transcript intact.
+
 **Requirements:** `gbrain` CLI on the same host (the skill shells out to it for context and saving).
 
 ## Run the web app (alternative)
