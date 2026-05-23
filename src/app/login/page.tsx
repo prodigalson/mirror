@@ -39,14 +39,13 @@ export default async function LoginPage({
 
       <section className="flex-1 flex items-center justify-center px-6 pt-8 pb-24">
         <div className="w-full max-w-sm">
-          <div className="relative mx-auto mb-10 w-[120px] h-[204px] rounded-[1000px] shadow-2xl overflow-hidden bg-paper-200">
+          <div className="relative mx-auto mb-10 w-[120px] h-[204px]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/images/reflect-mirror.png"
+              src="/images/reflect-mirror-cutout.png"
               alt="Elegant oval gold-framed mirror"
-              className="w-full h-full object-cover rounded-[1000px]"
+              className="w-full h-full object-contain drop-shadow-2xl"
             />
-            <div className="mirror-glare absolute inset-0 pointer-events-none" aria-hidden="true" />
           </div>
 
           <div className="text-center mb-10">

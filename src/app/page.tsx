@@ -108,14 +108,13 @@ export default async function Home() {
 function MirrorHeroImage() {
   return (
     <div className="relative mb-16 px-4">
-      <div className="w-[200px] h-[340px] md:w-[260px] md:h-[440px] relative z-10 rounded-[1000px] shadow-2xl overflow-hidden bg-paper-200">
+      <div className="w-[200px] h-[340px] md:w-[260px] md:h-[440px] relative z-10">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/images/reflect-mirror.png"
+          src="/images/reflect-mirror-cutout.png"
           alt="Elegant oval gold-framed mirror"
-          className="w-full h-full object-cover rounded-[1000px]"
+          className="w-full h-full object-contain drop-shadow-2xl"
         />
-        <div className="mirror-glare absolute inset-0 pointer-events-none" aria-hidden="true" />
       </div>
     </div>
   );
