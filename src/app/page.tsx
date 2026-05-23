@@ -107,8 +107,8 @@ export default async function Home() {
 
 function MirrorHeroImage() {
   return (
-    <div className="relative mb-16 px-4">
-      <div className="w-[200px] h-[340px] md:w-[260px] md:h-[440px] relative z-10">
+    <div className="relative mb-10 px-4">
+      <div className="w-[230px] h-[390px] md:w-[300px] md:h-[500px] relative z-10">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/images/reflect-mirror-cutout.png"
