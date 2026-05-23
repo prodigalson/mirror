@@ -2,8 +2,15 @@
 
 @theme {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-serif: var(--font-newsreader), ui-serif, Georgia, serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  --color-paper-50: #fffefc;
+  --color-paper-100: #fcfbf8;
+  --color-paper-200: #f5f4ef;
+  --color-paper-300: #e8e6df;
+  --color-paper-800: #2d2b2a;
+  --color-paper-900: #1a1918;
 
   --color-ink: #1a1612;
   --color-ink-muted: #5b5148;
@@ -19,6 +26,9 @@
   --color-rose-accent: #b56d6d;
   --color-indigo-accent: #6f7abd;
   --color-stone-accent: #7a6e5f;
+
+  --shadow-mirror: 0 20px 40px -10px rgb(0 0 0 / 0.08), 0 0 1px rgb(0 0 0 / 0.1);
+  --shadow-mirror-inner: inset 0 4px 20px rgb(0 0 0 / 0.04), inset 0 -4px 20px rgb(0 0 0 / 0.02);
 }
 
 :root {
@@ -67,3 +77,29 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 .fade-in-up { animation: fade-in-up 0.4s ease-out both; }
+
+.subtle-grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+.mirror-glare {
+  background: linear-gradient(
+    105deg,
+    rgb(255 255 255 / 0) 20%,
+    rgb(255 255 255 / 0.8) 45%,
+    rgb(255 255 255 / 0.9) 50%,
+    rgb(255 255 255 / 0.2) 55%,
+    rgb(255 255 255 / 0) 80%
+  );
+  transform: translateX(-150%) skewX(-15deg);
+  animation: glare 8s infinite ease-in-out;
+}
+
+@keyframes glare {
+  0%, 20% {
+    transform: translateX(-150%) skewX(-15deg);
+  }
+  80%, 100% {
+    transform: translateX(150%) skewX(-15deg);
+  }
+}
