@@ -37,7 +37,7 @@ export default function LoginForm({ nextPath }: { nextPath?: string }) {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div>
-        <label className="block text-xs font-mono uppercase tracking-wider text-ink-faint mb-2">
+        <label className="block text-xs font-mono uppercase tracking-wider text-paper-800/40 mb-2">
           Name
         </label>
         <input
@@ -46,12 +46,12 @@ export default function LoginForm({ nextPath }: { nextPath?: string }) {
           onChange={(e) => setName(e.target.value)}
           autoComplete="username"
           required
-          className="w-full px-4 py-3 rounded-lg bg-paper-soft border border-thread/60 text-ink focus:outline-none focus:border-ink transition"
-          placeholder="you"
+          className="w-full px-4 py-3 rounded-lg bg-paper-100 border border-paper-300 text-paper-900 placeholder:text-paper-800/35 focus:outline-none focus:border-paper-900 transition"
+          placeholder="your name"
         />
       </div>
       <div>
-        <label className="block text-xs font-mono uppercase tracking-wider text-ink-faint mb-2">
+        <label className="block text-xs font-mono uppercase tracking-wider text-paper-800/40 mb-2">
           Password
         </label>
         <input
@@ -61,7 +61,7 @@ export default function LoginForm({ nextPath }: { nextPath?: string }) {
           autoComplete="current-password"
           required
           minLength={6}
-          className="w-full px-4 py-3 rounded-lg bg-paper-soft border border-thread/60 text-ink focus:outline-none focus:border-ink transition"
+          className="w-full px-4 py-3 rounded-lg bg-paper-100 border border-paper-300 text-paper-900 placeholder:text-paper-800/35 focus:outline-none focus:border-paper-900 transition"
           placeholder="at least 6 characters"
         />
       </div>
@@ -69,9 +69,9 @@ export default function LoginForm({ nextPath }: { nextPath?: string }) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-3 rounded-lg bg-ink text-paper font-medium hover:bg-ink-muted transition disabled:opacity-50"
+        className="w-full py-3.5 rounded-full bg-paper-900 text-white text-sm font-medium tracking-wide hover:bg-paper-800 transition-all shadow-lg shadow-paper-900/10 hover:shadow-paper-900/20 disabled:opacity-50"
       >
-        {loading ? "..." : "Enter"}
+        {loading ? "..." : "Create or enter"}
       </button>
     </form>
   );
