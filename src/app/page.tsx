@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { getSession } from "@/lib/auth";
 import { MODES } from "@/lib/modes";
 
 const steps = [
@@ -43,8 +42,6 @@ const steps = [
 ];
 
 export default async function Home() {
-  const session = await getSession();
-
   return (
     <main className="min-h-screen flex flex-col bg-paper-100 text-paper-900 subtle-grain overflow-hidden">
       <header className="w-full px-6 py-8 flex justify-between items-center max-w-7xl mx-auto z-10">
@@ -64,23 +61,7 @@ export default async function Home() {
           >
             GitHub
           </a>
-          {session ? (
-            <Link href="/app" className="text-paper-900 hover:text-paper-800 transition-colors">
-              Your sessions &rarr;
-            </Link>
-          ) : (
-            <Link href="/login" className="hover:text-paper-900 transition-colors">
-              Sign in
-            </Link>
-          )}
         </nav>
-        <Link
-          href={session ? "/app" : "/login"}
-          className="md:hidden text-paper-900"
-          aria-label={session ? "Your sessions" : "Sign in"}
-        >
-          <ListIcon />
-        </Link>
       </header>
 
       <section className="flex-grow flex flex-col items-center pt-12 pb-28">
@@ -104,18 +85,12 @@ export default async function Home() {
               Install the skill
               <span aria-hidden> &rarr;</span>
             </a>
-            <Link
-              href={session ? "/app" : "/login"}
-              className="px-8 py-3.5 rounded-full text-sm font-medium text-paper-900 border border-paper-300 hover:bg-paper-200 transition-all w-full sm:w-auto"
-            >
-              {session ? "Open web app" : "Or try it in a browser"}
-            </Link>
           </div>
         </div>
 
         <HowItWorks />
         <ModesSection />
-        <RunOptions sessionActive={Boolean(session)} />
+        <RunOptions />
       </section>
 
       <footer className="border-t border-paper-300/50 mt-auto py-12 px-6 relative z-10">
@@ -200,13 +175,13 @@ function ModesSection() {
   );
 }
 
-function RunOptions({ sessionActive }: { sessionActive: boolean }) {
+function RunOptions() {
   return (
     <section className="w-full max-w-3xl mx-auto px-6 mt-40 z-10">
       <p className="font-mono text-xs tracking-[0.2em] text-paper-800/40 uppercase mb-8 text-center md:text-left">
-        Two ways to run it
+        Run it as a skill
       </p>
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid gap-6">
         <article className="p-6 rounded-lg bg-paper-50/50 border border-paper-300/60 shadow-mirror">
           <h3 className="font-serif text-3xl mb-2 text-paper-900">As a skill</h3>
           <p className="text-sm text-paper-800/60 leading-relaxed mb-4 font-light">
@@ -227,20 +202,6 @@ function RunOptions({ sessionActive }: { sessionActive: boolean }) {
             View SKILL.md
           </a>
         </article>
-        <article className="p-6 rounded-lg bg-paper-50/50 border border-paper-300/60 shadow-mirror">
-          <h3 className="font-serif text-3xl mb-2 text-paper-900">As a web app</h3>
-          <p className="text-sm text-paper-800/60 leading-relaxed mb-4 font-light">
-            Sign in and paste your own Anthropic or OpenAI API key. Chat runs on your
-            quota, not ours. Pulls from gbrain, optional ElevenLabs voice, optional routing
-            through your OpenClaw or webhook agent.
-          </p>
-          <Link
-            href={sessionActive ? "/app" : "/login"}
-            className="text-sm text-paper-900 underline decoration-paper-300 underline-offset-4"
-          >
-            Open the app
-          </Link>
-        </article>
       </div>
     </section>
   );
@@ -253,14 +214,6 @@ function MirrorLogo() {
       <line x1="12" y1="3" x2="12" y2="21" stroke="currentColor" strokeWidth="1" opacity="0.5" />
       <circle cx="8" cy="12" r="1.6" fill="currentColor" />
       <circle cx="16" cy="12" r="1.6" fill="currentColor" />
-    </svg>
-  );
-}
-
-function ListIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-      <path d="M6 9h16M6 14h16M6 19h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
 }
