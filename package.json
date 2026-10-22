@@ -44,5 +44,13 @@
   "trustedDependencies": [
     "sharp",
     "unrs-resolver"
-  ]
+  ],
+  "overrides": {
+    "@esbuild-kit/core-utils": {
+      "esbuild": "^0.25.0"
+    },
+    "tsx": {
+      "esbuild": "^0.25.0"
+    }
+  }
 }
