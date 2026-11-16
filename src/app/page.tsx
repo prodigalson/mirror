@@ -109,7 +109,7 @@ export default async function Home() {
           </span>
           <span className="font-mono text-sm text-paper-800/40">
             made with gbrain ·{" "}
-            <a href="https://chingularity.com/terms" target="_blank" rel="noopener" className="underline hover:text-paper-900">terms</a>
+            <a href="https://chingularity.com/terms" target="_blank" rel="noopener" className="underline hover:text-paper-900">terms</a> {'·'} <a href="https://chingularity.com/privacy" target="_blank" rel="noopener" className="underline hover:text-paper-900">privacy</a>
           </span>
         </div>
       </footer>
