@@ -107,7 +107,10 @@ export default async function Home() {
           <span className="font-serif text-xl italic text-paper-900">
             Mirror - a self-chat companion
           </span>
-          <span className="font-mono text-sm text-paper-800/40">made with gbrain</span>
+          <span className="font-mono text-sm text-paper-800/40">
+            made with gbrain ·{" "}
+            <a href="https://chingularity.com/terms" target="_blank" rel="noopener" className="underline hover:text-paper-900">terms</a>
+          </span>
         </div>
       </footer>
     </main>
