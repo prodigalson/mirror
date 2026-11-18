@@ -2,9 +2,13 @@ import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 
-const SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "mirror-dev-secret-change-in-prod"
-);
+// No built-in fallback: a secret published in this repository would let anyone
+// forge a session wherever JWT_SECRET is missing.
+function secret() {
+  const value = process.env.JWT_SECRET;
+  if (!value) throw new Error("JWT_SECRET is not set");
+  return new TextEncoder().encode(value);
+}
 
 const COOKIE_NAME = "mirror_session";
 
@@ -27,12 +31,12 @@ export async function signToken(payload: SessionPayload): Promise<string> {
     .setProtectedHeader({ alg: "HS256" })
     .setExpirationTime("30d")
     .setIssuedAt()
-    .sign(SECRET);
+    .sign(secret());
 }
 
 export async function verifyToken(token: string): Promise<SessionPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, SECRET);
+    const { payload } = await jwtVerify(token, secret());
     return payload as unknown as SessionPayload;
   } catch {
     return null;
